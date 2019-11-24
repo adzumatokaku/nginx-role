@@ -1,0 +1,39 @@
+---
+# tasks file for nginx-role
+
+- name: get 1st ip address
+  shell: "docker inspect -f '{{ '{{' }} .NetworkSettings.Networks.deploy.IPAddress {{ '}}'  }}' webapp-nginx-5001"
+  register: ip1_output
+- set_fact:
+    cont1_ip: "{{ ip1_output.stdout }}"
+
+- name: get 2nd ip address
+  shell: "docker inspect -f '{{ '{{' }} .NetworkSettings.Networks.deploy.IPAddress {{ '}}'  }}' webapp-nginx-5002"
+  register: ip2_output
+- set_fact:
+    cont2_ip: "{{ ip2_output.stdout }}"
+
+- name: get 3rd ip address
+  shell: "docker inspect -f '{{ '{{' }} .NetworkSettings.Networks.deploy.IPAddress {{ '}}'  }}' webapp-nginx-5003"
+  register: ip3_output
+- set_fact:
+    cont3_ip: "{{ ip3_output.stdout }}"
+
+- name: make nginx.conf file
+  template:
+    src: nginx.conf.j2
+    dest: /var/local/nginx/nginx.conf
+
+- name: run nginx container
+  docker_container:
+    name: nginx-balancer
+    hostname: nginx
+    state: started
+    image: "nginx:latest"
+    pull: true
+    ports:
+      - "8081:80"
+    networks:
+      - name: deploy
+    volumes:
+      - /var/local/nginx/nginx.conf:/etc/nginx/nginx.conf:ro

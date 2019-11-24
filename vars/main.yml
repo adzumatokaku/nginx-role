@@ -1,0 +1,9 @@
+---
+# vars file for nginx-role
+
+ip1_output:
+ip2_output:
+ip3_output:
+cont1_ip:
+cont2_ip:
+cont3_ip:
